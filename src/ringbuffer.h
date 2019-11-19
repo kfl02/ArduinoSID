@@ -1,7 +1,7 @@
 #pragma once
 
-#ifndef SID_RINGBUFFER_INCLUDED
-#define SID_RINGBUFFER_INCLUDED
+#ifndef ARDUINOSID_RINGBUFFER_H
+#define ARDUINOSID_RINGBUFFER_H
 
 #include <cstddef>
 #include <iostream>
@@ -72,4 +72,4 @@ public:
 	}
 };
 
-#endif // SID_RINGBUFFER_INCLUDED
+#endif // ARDUINOSID_RINGBUFFER_H
