@@ -35,6 +35,8 @@
 
 ******************************************************************************/
 
+#include <array>
+#include <functional>
 #include <cstdint>
 #include <cstddef>
 #include <cassert>
@@ -84,9 +86,9 @@ const int SID_D7 = 7;
 
 const int SID_PHI_2 = 13;
 
-const int SID_CS[] = { A5, A6, A7, 10, 11, 12 };
+const int SID_ARRAY_MAX_NUM_SIDS = 6;
 
-const int SID_ARRAY_MAX_NUM_SIDS = sizeof(SID_CS) / sizeof(SID_CS[0]);
+const std::array<int, SID_ARRAY_MAX_NUM_SIDS> SID_CS = { A5, A6, A7, 10, 11, 12 };
 
 const int SID_NUM_VOICES = 3;
 const int SID_NUM_VOICE_REGS = 6;
@@ -125,192 +127,239 @@ public:
 private:
 	uint8_t voiceNo;
 
-	uint8_t FQLo;
-	uint8_t FQHi;
-	uint8_t PWLo;
-	uint8_t PWHi;
-	uint8_t WvCtl;
-	uint8_t AD;
-	uint8_t SR;
+	uint8_t FQLo = 0;
+	uint8_t FQHi = 0;
+	uint8_t PWLo = 0;
+	uint8_t PWHi = 0;
+	uint8_t WvCtl = 0;
+	uint8_t AD = 0;
+	uint8_t SR = 0;
+
+	std::function<void(const uint8_t, const uint8_t)> registerWriteCallback = [](const uint8_t, const uint8_t) {};
 
 public:
-	uint8_t getVoiceNo() {
+	uint8_t const getVoiceNo() {
 		return voiceNo;
 	}
 
-	void setVoiceNo(uint8_t voiceNo) {
+    const void setVoiceNo(const uint8_t voiceNo) {
 		assert(voiceNo < SID_NUM_VOICES);
 
 		this->voiceNo = voiceNo;
 	}
 
-	uint8_t getRegNo(uint8_t reg) {
+    const void setRegisterWriteCallback(const std::function<void(uint8_t, uint8_t)> cb) {
+	    registerWriteCallback = cb;
+	}
+
+	uint8_t const getRegNo(uint8_t reg) {
 		assert(reg < SID_NUM_VOICE_REGS);
 
 		return (voiceNo * SID_NUM_VOICE_REGS) + reg;
 	}
 
-	uint16_t getFQ() {
+	uint16_t const getFQ() {
 		return (((uint16_t) FQHi) << 8) | FQLo;
 	}
 
-	void setFQ(uint16_t FQ) {
+	void setFQ(const uint16_t FQ) {
 		FQLo = (uint8_t) (FQ & 0xff);
 		FQHi = (uint8_t) (FQ >> 8);
+
+        registerWriteCallback(getRegNo(SIDRegFQLo), FQLo);
+		registerWriteCallback(getRegNo(SIDRegFQHi), FQHi);
 	}
 
-	uint16_t getPW() {
+	uint16_t const getPW() {
 		return (((uint16_t) PWHi) << 12) | (((uint16_t) PWLo) << 4);
 	}
 
-	void setPW(uint16_t PW) {
+	void setPW(const uint16_t PW) {
 		PWLo = (uint8_t) ((PW >> 4) & 0xff);
 		PWHi = (uint8_t) (PW >> 12);
+
+        registerWriteCallback(getRegNo(SIDRegPWLo), PWLo);
+        registerWriteCallback(getRegNo(SIDRegPWHi), PWHi);
 	}
 
-	uint8_t getWave() {
+	uint8_t const getWave() {
 		return WvCtl & 0xf0;
 	}
 
-	void setWave(uint8_t wave) {
+	void setWave(const uint8_t wave) {
 		WvCtl = (WvCtl & 0x0f) | (wave & 0xf0);
+
+        registerWriteCallback(getRegNo(SIDRegWvCtl), WvCtl);
 	}
 
-	bool getNoise() {
+	bool const getNoise() {
 		return WvCtl & SIDWavNse;
 	}
 
-	void setNoise(bool onOff) {
+	void setNoise(const bool onOff) {
 		WvCtl = (WvCtl & ~SIDWavNse) | (onOff ? SIDWavNse : 0);
+
+        registerWriteCallback(getRegNo(SIDRegWvCtl), WvCtl);
 	}
 
-	bool getSquare() {
+	bool const getSquare() {
 		return WvCtl & SIDWavSqu;
 	}
 
-	void setSquare(bool onOff) {
+	void setSquare(const bool onOff) {
 		WvCtl = (WvCtl & ~SIDWavSqu) | (onOff ? SIDWavSqu : 0);
+
+        registerWriteCallback(getRegNo(SIDRegWvCtl), WvCtl);
 	}
 
-	bool getSawtooth() {
+	bool const getSawtooth() {
 		return WvCtl & SIDWavSaw;
 	}
 
-	void setSawtooth(bool onOff) {
+	void setSawtooth(const bool onOff) {
 		WvCtl = (WvCtl & ~SIDWavSaw) | (onOff ? SIDWavSaw : 0);
+
+        registerWriteCallback(getRegNo(SIDRegWvCtl), WvCtl);
 	}
 
-	bool getTriangle() {
+	bool const getTriangle() {
 		return WvCtl & SIDWavTri;
 	}
 
-	void setTriangle(bool onOff) {
+	void setTriangle(const bool onOff) {
 		WvCtl = (WvCtl & ~SIDWavTri) | (onOff ? SIDWavTri : 0);
+
+        registerWriteCallback(getRegNo(SIDRegWvCtl), WvCtl);
 	}
 
-	uint8_t getControl() {
+	uint8_t const getControl() {
 		return WvCtl & 0x0f;
 	}
 
-	void setControl(uint8_t control) {
+	void setControl(const uint8_t control) {
 		WvCtl = (WvCtl & 0xf0) | (control & 0x0f);
+
+        registerWriteCallback(getRegNo(SIDRegWvCtl), WvCtl);
 	}
 
-	bool getTest() {
+	bool const getTest() {
 		return WvCtl & SIDCtlTst;
 	}
 
-	void setTest(bool test) {
+	void setTest(const bool test) {
 		WvCtl = (WvCtl & ~SIDCtlTst) | (test ? SIDCtlTst : 0);
+
+        registerWriteCallback(getRegNo(SIDRegWvCtl), WvCtl);
 	}
 
-	bool getRingMod() {
+	bool const getRingMod() {
 		return WvCtl & SIDCtlRMd;
 	}
 
-	void setRingMod(bool ringMod) {
+	void setRingMod(const bool ringMod) {
 		WvCtl = (WvCtl & ~SIDCtlRMd) | (ringMod ? SIDCtlRMd : 0);
+
+        registerWriteCallback(getRegNo(SIDRegWvCtl), WvCtl);
 	}
 
-	bool getSync() {
+	bool const getSync() {
 		return WvCtl & SIDCtlSyn;
 	}
 
-	void setSync(bool sync) {
+	void setSync(const bool sync) {
 		WvCtl = (WvCtl & ~SIDCtlSyn) | (sync ? SIDCtlSyn : 0);
+
+        registerWriteCallback(getRegNo(SIDRegWvCtl), WvCtl);
 	}
 
-	bool getGate() {
+	bool const getGate() {
 		return WvCtl & SIDCtlGat;
 	}
 
-	void setGate(bool gate) {
+	void setGate(const bool gate) {
 		WvCtl = (WvCtl & ~SIDCtlGat) | (gate ? SIDCtlGat : 0);
+
+        registerWriteCallback(getRegNo(SIDRegWvCtl), WvCtl);
 	}
 
-	uint8_t getAD() {
+	uint8_t const getAD() {
 		return AD;
 	}
 
-	void setAD(uint8_t AD) {
+	void setAD(const uint8_t AD) {
 		this->AD = AD;
+
+        registerWriteCallback(getRegNo(SIDRegAD), this->AD);
 	}
 
-	uint8_t getSR() {
+	uint8_t const getSR() {
 		return SR;
 	}
 
-	void setSR(uint8_t SR) {
+	void setSR(const uint8_t SR) {
 		this->SR = SR;
+
+        registerWriteCallback(getRegNo(SIDRegSR), this->SR);
 	}
 
-	uint16_t getADSR() {
+	uint16_t const getADSR() {
 		return ((uint16_t) AD << 8) | (uint16_t) SR;
 	}
 
-	void setADSR(uint16_t ADSR) {
+	void setADSR(const uint16_t ADSR) {
 		AD = (uint8_t) (ADSR >> 8);
 		SR = (uint8_t) (ADSR & 0xff);
+
+        registerWriteCallback(getRegNo(SIDRegAD), AD);
+        registerWriteCallback(getRegNo(SIDRegSR), SR);
 	}
 
-	uint8_t getAttack() {
+	uint8_t const getAttack() {
 		return (AD & 0xf0) >> 4;
 	}
 
-	void setAttack(uint8_t attack) {
+	void setAttack(const uint8_t attack) {
 		assert(attack <= 0x0f);
 
 		AD = (AD & 0x0f) | (attack << 4);
+
+        registerWriteCallback(getRegNo(SIDRegAD), AD);
 	}
 
-	uint8_t getDecay() {
+	uint8_t const getDecay() {
 		return (AD & 0x0f);
 	}
 
-	void setDecay(uint8_t decay) {
+	void setDecay(const uint8_t decay) {
 		assert(decay <= 0x0f);
 
 		AD = (AD & 0xf0) | decay;
+
+        registerWriteCallback(getRegNo(SIDRegAD), AD);
 	}
 
-	uint8_t getSustain() {
+	uint8_t const getSustain() {
 		return (AD & 0xf0) >> 4;
 	}
 
-	void setSustain(uint8_t sustain) {
+	void setSustain(const uint8_t sustain) {
 		assert(sustain <= 0x0f);
 
 		SR = (SR & 0x0f) | (sustain << 4);
+
+        registerWriteCallback(getRegNo(SIDRegSR), SR);
 	}
 
-	uint8_t getRelease() {
+	uint8_t const getRelease() {
 		return (SR & 0x0f);
 	}
 
-	void setRelease(uint8_t release) {
+	void setRelease(const uint8_t release) {
 		assert(release <= 0x0f);
 
 		SR = (SR & 0xf0) | release;
+
+        registerWriteCallback(getRegNo(SIDRegSR), SR);
 	}
 };
 
@@ -334,96 +383,123 @@ public:
 	const uint8_t SIDFModHP = 0x40;
 
 private:
-	uint8_t FCLo;
-	uint8_t FCHi;
-	uint8_t ResFilt;
-	uint8_t ModVol;
+	uint8_t FCLo = 0;
+	uint8_t FCHi = 0;
+	uint8_t ResFilt = 0;
+	uint8_t ModVol = 0;
+
+    std::function<void(const uint8_t, const uint8_t)> registerWriteCallback = [](const uint8_t, const uint8_t) {};
 
 public:
-	uint16_t getFilterFQ() {
+    void const setRegisterWriteCallback(std::function<void(const uint8_t, const uint8_t)> cb) {
+        registerWriteCallback = cb;
+    }
+
+    uint16_t const getFilterFQ() {
 		return ((uint16_t) FCLo << 5) | ((uint16_t) FCHi << 8);
 	}
 
-	void setFilterFQ(uint16_t FQ) {
+	void setFilterFQ(const uint16_t FQ) {
 		FCHi = FQ & 0xff00;
 		FCLo = (FQ & 0x00ff) >> 5;
+
+        registerWriteCallback(SIDRegFCHi, FCHi);
+        registerWriteCallback(SIDRegFCLo, FCLo);
 	}
 
-	uint16_t getFilterReq() {
+	uint16_t const getFilterReq() {
 		return ResFilt & 0xf0;
 	}
 
-	void setFilterRes(uint8_t res) {
+	void setFilterRes(const uint8_t res) {
 		ResFilt = (ResFilt & 0x0f) | (res & 0xf0);
+
+        registerWriteCallback(SIDRegResFilt, ResFilt);
 	}
 
-	bool getFilter1() {
+	bool const getFilter1() {
 		return ResFilt & SIDFilt1;
 	}
 
-	void setFilter1(bool filter) {
+	void setFilter1(const bool filter) {
 		ResFilt = (ResFilt & ~SIDFilt1) | (filter ? SIDFilt1 : 0);
+
+        registerWriteCallback(SIDRegResFilt, ResFilt);
 	}
 
-	bool getFilter2() {
+	bool const getFilter2() {
 		return ResFilt & SIDFilt2;
 	}
 
-	void setFilter2(bool filter) {
+	void setFilter2(const bool filter) {
 		ResFilt = (ResFilt & ~SIDFilt2) | (filter ? SIDFilt2 : 0);
+
+        registerWriteCallback(SIDRegResFilt, ResFilt);
 	}
 
-	bool getFilter3() {
+	bool const getFilter3() {
 		return ResFilt & SIDFilt3;
 	}
 
-	void setFilter3(bool filter) {
+	void setFilter3(const bool filter) {
 		ResFilt = (ResFilt & ~SIDFilt3) | (filter ? SIDFilt3 : 0);
+
+        registerWriteCallback(SIDRegResFilt, ResFilt);
 	}
 
-	bool getFilterEx() {
+	bool const getFilterEx() {
 		return ResFilt & SIDFiltEx;
 	}
 
-	void setFilterEx(bool filter) {
+	void setFilterEx(const bool filter) {
 		ResFilt = (ResFilt & ~SIDFiltEx) | (filter ? SIDFiltEx : 0);
+
+        registerWriteCallback(SIDRegResFilt, ResFilt);
 	}
 
-	bool getFilter(int voice) {
+	bool const getFilter(const int voice) {
 		assert(voice < 3);
 
 		return ResFilt & (1 << voice);
 	}
 
-	void setFilter(int voice, bool filter) {
+	void setFilter(const int voice, const bool filter) {
 		assert(voice < 3);
 
 		uint8_t bit = (1 << voice);
 		ResFilt = (ResFilt & ~bit) | (filter ? bit : 0);
+
+        registerWriteCallback(SIDRegResFilt, ResFilt);
 	}
 
-	uint8_t getFilterMode() {
+	uint8_t const getFilterMode() {
 		return ModVol & 0x70;
 	}
 
-	void setFilterMode(uint8_t mode) {
+	void setFilterMode(const uint8_t mode) {
 		ModVol = (ModVol & 0x0f) | (mode & 0x70);
+
+        registerWriteCallback(SIDRegModVol, ModVol);
 	}
 
-	void setFilterMode(uint8_t mode, bool onOff) {
+	void setFilterMode(const uint8_t mode, const bool onOff) {
 		assert(mode == SIDFModHP || mode == SIDFModBP || mode == SIDFModLP);
 
 		ModVol = (ModVol & ~mode) | (onOff ? mode : 0);
+
+        registerWriteCallback(SIDRegModVol, ModVol);
 	}
 
-	uint8_t getVolume() {
+	uint8_t const getVolume() {
 		return ModVol & 0x0f;
 	}
 
-	void setVolume(uint8_t volume) {
+	void setVolume(const uint8_t volume) {
 		assert(volume <= 0x0f);
 
 		ModVol = (ModVol & 0xf0) | volume;
+
+        registerWriteCallback(SIDRegModVol, ModVol);
 	}
 };
 
@@ -431,47 +507,55 @@ public:
 
 class SIDMisc {
 private:
-	uint8_t PotX;
-	uint8_t PotY;
-	uint8_t Osc3;
-	uint8_t Env3;
+	uint8_t PotX = 0;
+	uint8_t PotY = 0;
+	uint8_t Osc3 = 0;
+	uint8_t Env3 = 0;
 
 public:
-	uint8_t getPotX() {
+	uint8_t const getPotX() {
 		return PotX;
 	}
 
-	uint8_t getPotY() {
+	uint8_t const getPotY() {
 		return PotY;
 	}
 
-	uint8_t getOsc3() {
+	uint8_t const getOsc3() {
 		return Osc3;
 	}
 
-	uint8_t getEnv3() {
+	uint8_t const getEnv3() {
 		return Env3;
 	}
 };
 
 class SID {
 private:
-	SIDVoice voice[SID_NUM_VOICES];
+    uint8_t SIDNo = 0;
+
+    std::array<SIDVoice, SID_NUM_VOICES> voices;
 	SIDFilter filter;
 	SIDMisc misc;
 
 public:
-	const SIDVoice& getVoice(uint8_t voiceNo) {
-		assert(voiceNo < SID_NUM_VOICES);
-
-		return voice[voiceNo];
+	SID() {
+		for(uint8_t i = 0; i < SID_NUM_VOICES; i++) {
+			voices[i].setVoiceNo(i);
+		}
 	}
 
-	const SIDFilter& getFilter() {
+    SIDVoice& getVoice(uint8_t voiceNo) {
+		assert(voiceNo < SID_NUM_VOICES);
+
+		return voices[voiceNo];
+	}
+
+    SIDFilter& getFilter() {
 		return filter;
 	}
 
-	const SIDMisc& gteMisc() {
+    SIDMisc& getMisc() {
 		return misc;
 	}
 };
