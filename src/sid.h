@@ -545,6 +545,16 @@ public:
 		}
 	}
 
+    uint8_t const getSIDNo() {
+        return SIDNo;
+    }
+
+    const void setSIDNo(const uint8_t SIDNo) {
+        assert(SIDNo < SID_ARRAY_MAX_NUM_SIDS);
+
+        this->SIDNo = SIDNo;
+    }
+
     SIDVoice& getVoice(uint8_t voiceNo) {
 		assert(voiceNo < SID_NUM_VOICES);
 
@@ -561,7 +571,16 @@ public:
 };
 
 class SIDArray {
+private:
+    RingBuffer<std::tuple<uint8_t, uint8_t, uint8_t>, SID_ARRAY_MAX_NUM_SIDS * SID_NUM_WO_REGS> buffer;
+    std::array<SID, SID_ARRAY_MAX_NUM_SIDS> SIDs;
 
+public:
+    SIDArray() {
+        for(uint8_t i = 0; i <SID_ARRAY_MAX_NUM_SIDS; i++) {
+            SIDs[i].setSIDNo(i);
+        }
+    }
 };
 
 #endif // SID_SID_INCLUDED
