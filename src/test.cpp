@@ -8,6 +8,8 @@ const void testCallback(const uint8_t reg, const uint8_t val) {
 int main() {
     SID sid;
 
+    sid.setSIDNo(1);
+
     for(uint8_t i = 0; i < SID_NUM_VOICES; i++) {
         sid.getVoice(i).setRegisterWriteCallback(testCallback);
     }
