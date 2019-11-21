@@ -28,15 +28,17 @@ public:
 		tail = 0;
 	}
 
-	bool empty() {
+	bool const empty() {
 		return size == 0;
 	}
 
-	bool full() {
+	bool const full() {
 		return size == max_size;
 	}
 
-	void put(const T& elem) {
+	void const put(const T& elem) {
+	    std::cout << "put: size " << size << " max_size: " << max_size << "\n";
+
 		values[tail] = elem;
 		tail = (tail + 1) % max_size;
 
