@@ -4,7 +4,6 @@
 #define ARDUINOSID_RINGBUFFER_H
 
 #include <cstddef>
-#include <iostream>
 
 // a flaky ring buffer implementation
 
@@ -23,7 +22,7 @@ public:
 	}
 
 	void clear() {
-		size = 0;
+        size = 0;
 		head = 0;
 		tail = 0;
 	}
@@ -36,9 +35,7 @@ public:
 		return size == max_size;
 	}
 
-	void const put(const T& elem) {
-	    std::cout << "put: size " << size << " max_size: " << max_size << "\n";
-
+	void put(const T& elem) {
 		values[tail] = elem;
 		tail = (tail + 1) % max_size;
 
@@ -50,7 +47,7 @@ public:
 	}
 
 	T& pop_head() {
-		T& elem = values[head];
+        T& elem = values[head];
 
 		head = (head + 1) % max_size;
 
@@ -60,7 +57,7 @@ public:
 	}
 
 	T& pop_tail() {
-		if(tail == 0) {
+        if(tail == 0) {
 			tail = max_size - 1;
 		} else {
 			tail = tail - 1;
@@ -70,7 +67,7 @@ public:
 
 		size = (tail - head + max_size) % max_size;
 
-		return elem;
+        return elem;
 	}
 };
 

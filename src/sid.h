@@ -11,20 +11,24 @@
 
 #include "ringbuffer.h"
 
-static const uint8_t SID_ARRAY_MAX_NUM_SIDS = 6;
-
-static const uint8_t SID_NUM_VOICES = 3;
-static const uint8_t SID_NUM_VOICE_REGS = 6;
-static const uint8_t SID_NUM_FILTER_REGS = 4;
-static const uint8_t SID_NUM_WO_REGS = SID_NUM_VOICES * SID_NUM_VOICE_REGS + SID_NUM_FILTER_REGS;
-static const uint8_t SID_NUM_RO_REGS = 4;
-static const uint8_t SID_NUM_REGS = SID_NUM_WO_REGS + SID_NUM_RO_REGS;
 
 // representation of a SID chip with 3 voices and filter/vol and misc registers
 
 class SID {
-    class SIDVoice {
+
+public:
+    static const uint8_t NUM_VOICES = 3;
+    static const uint8_t NUM_VOICE_REGS = 7;
+    static const uint8_t NUM_FILTER_REGS = 4;
+    static const uint8_t NUM_WO_REGS = NUM_VOICES * NUM_VOICE_REGS + NUM_FILTER_REGS;
+    static const uint8_t NUM_RO_REGS = 4;
+    static const uint8_t NUM_REGS = NUM_WO_REGS + NUM_RO_REGS;
+
+protected:
+
     // registers for a single voice of a SID chip
+
+    class SIDVoice {
 
     public:
         // register numbers
@@ -68,7 +72,7 @@ class SID {
     public:
         SIDVoice(const uint8_t SIDNo, const uint8_t voiceNo)
             : voiceNo((SIDNo << 4) | (voiceNo & 0xf)),
-              regOffset((SIDNo << 4) | ((voiceNo & 0xf) * SID_NUM_VOICES)) {
+              regOffset((SIDNo << 4) | ((voiceNo & 0xf) * NUM_VOICES)) {
         }
 
         uint8_t const getVoiceNo() {
@@ -80,10 +84,12 @@ class SID {
         }
 
         uint8_t const getRegNo(const uint8_t reg) {
-            assert(reg < SID_NUM_VOICE_REGS);
+            assert(reg < NUM_VOICE_REGS);
 
             return regOffset + reg;
         }
+
+        // frequency
 
         uint16_t const getFQ() {
             return (((uint16_t) FQHi) << 8) | FQLo;
@@ -97,6 +103,8 @@ class SID {
             registerWriteCallback(getRegNo(SIDRegFQHi), FQHi);
         }
 
+        // pulse width
+
         uint16_t const getPW() {
             return (((uint16_t) PWHi) << 12) | (((uint16_t) PWLo) << 4);
         }
@@ -108,6 +116,8 @@ class SID {
             registerWriteCallback(getRegNo(SIDRegPWLo), PWLo);
             registerWriteCallback(getRegNo(SIDRegPWHi), PWHi);
         }
+
+        // waveforms
 
         uint8_t const getWave() {
             return WvCtl & 0xf0;
@@ -159,6 +169,8 @@ class SID {
             registerWriteCallback(getRegNo(SIDRegWvCtl), WvCtl);
         }
 
+        // control bits
+
         uint8_t const getControl() {
             return WvCtl & 0x0f;
         }
@@ -208,6 +220,8 @@ class SID {
 
             registerWriteCallback(getRegNo(SIDRegWvCtl), WvCtl);
         }
+
+        // envelope
 
         uint8_t const getAD() {
             return AD;
@@ -290,15 +304,15 @@ class SID {
         }
     };
 
-    class SIDFilter {
     // filter and volume registers of a SID chip
 
+    class SIDFilter {
     public:
         // register numbers
-        static const uint8_t SIDRegFCLo    = SID_NUM_VOICES * SID_NUM_VOICE_REGS + 0;
-        static const uint8_t SIDRegFCHi    = SID_NUM_VOICES * SID_NUM_VOICE_REGS + 1;
-        static const uint8_t SIDRegResFilt = SID_NUM_VOICES * SID_NUM_VOICE_REGS + 2;
-        static const uint8_t SIDRegModVol  = SID_NUM_VOICES * SID_NUM_VOICE_REGS + 3;
+        static const uint8_t SIDRegFCLo    = NUM_VOICES * NUM_VOICE_REGS + 0;
+        static const uint8_t SIDRegFCHi    = NUM_VOICES * NUM_VOICE_REGS + 1;
+        static const uint8_t SIDRegResFilt = NUM_VOICES * NUM_VOICE_REGS + 2;
+        static const uint8_t SIDRegModVol  = NUM_VOICES * NUM_VOICE_REGS + 3;
 
         static const uint8_t SIDFilt1  = 0x01;
         static const uint8_t SIDFilt2  = 0x02;
@@ -330,6 +344,8 @@ class SID {
             registerWriteCallback = cb;
         }
 
+        // filter frequency
+
         uint16_t const getFilterFQ() {
             return ((uint16_t) FCLo << 5) | ((uint16_t) FCHi << 8);
         }
@@ -342,7 +358,9 @@ class SID {
             registerWriteCallback(SIDOffset + SIDRegFCLo, FCLo);
         }
 
-        uint16_t const getFilterReq() {
+        // filter resonance
+
+        uint16_t const getFilterRes() {
             return ResFilt & 0xf0;
         }
 
@@ -351,6 +369,8 @@ class SID {
 
             registerWriteCallback(SIDOffset + SIDRegResFilt, ResFilt);
         }
+
+        // filter on/off flags
 
         bool const getFilter1() {
             return ResFilt & SIDFilt1;
@@ -407,6 +427,8 @@ class SID {
             registerWriteCallback(SIDOffset + SIDRegResFilt, ResFilt);
         }
 
+        // filter modes
+
         uint8_t const getFilterMode() {
             return ModVol & 0x70;
         }
@@ -425,6 +447,8 @@ class SID {
             registerWriteCallback(SIDOffset + SIDRegModVol, ModVol);
         }
 
+        // volume
+
         uint8_t const getVolume() {
             return ModVol & 0x0f;
         }
@@ -438,8 +462,9 @@ class SID {
         }
     };
 
-    class SIDMisc {
     // read only registers of a SID chip, not implemented
+
+    class SIDMisc {
 
     private:
         const uint8_t SIDNo;
@@ -473,7 +498,7 @@ class SID {
 private:
     const uint8_t SIDNo;
 
-    std::array<SIDVoice, SID_NUM_VOICES> voices = { SIDVoice(SIDNo, 0), SIDVoice(SIDNo, 1), SIDVoice(SIDNo, 2) };
+    std::array<SIDVoice, NUM_VOICES> voices = { SIDVoice(SIDNo, 0), SIDVoice(SIDNo, 1), SIDVoice(SIDNo, 2) };
     SIDFilter filter = SIDFilter(SIDNo);
     SIDMisc misc = SIDMisc(SIDNo);
 
@@ -486,7 +511,7 @@ public:
     }
 
     SIDVoice& getVoice(const uint8_t voiceNo) {
-        assert(voiceNo < SID_NUM_VOICES);
+        assert(voiceNo < NUM_VOICES);
 
         return voices[voiceNo];
     }
@@ -501,22 +526,24 @@ public:
 };
 
 // an array of SID chips
-// should be conforming to singleton pattern, but WTF - the whole thing is intended to run on an Arduino
 
 class SIDArray {
-private:
+public:
+    static const uint8_t MAX_NUM_SIDS = 6;
+
     // ring buffer for saving register write actions to be processed by Arduino timer
-    RingBuffer<std::tuple<uint8_t, uint8_t>, SID_ARRAY_MAX_NUM_SIDS * SID_NUM_WO_REGS> buffer;
+    RingBuffer<std::tuple<uint8_t, uint8_t>, MAX_NUM_SIDS * SID::NUM_WO_REGS> buffer;
 
     // array of SID chips
-    std::array<SID, SID_ARRAY_MAX_NUM_SIDS> SIDs = { 0, 1, 2, 3, 4, 5 };
+    std::array<SID, MAX_NUM_SIDS> SIDs = { 0, 1, 2, 3, 4, 5 };
 
-    static const void ringBufferCallback(RingBuffer<std::tuple<uint8_t, uint8_t>, SID_ARRAY_MAX_NUM_SIDS * SID_NUM_WO_REGS> buffer,
+    // callback function for register writes
+    static const void
+    ringBufferCallback(RingBuffer<std::tuple<uint8_t, uint8_t>, MAX_NUM_SIDS * SID::NUM_WO_REGS> &buffer,
             const int busyWait, const uint8_t reg, const uint8_t val) {
+        // if busyWait flag is true, loop until buffer is not full
         if(busyWait) {
             while(buffer.full()) {
-                std::cout << "busy\n" << std::flush;
-                exit(0);
             }
         }
 
@@ -525,21 +552,23 @@ private:
 
 public:
     SIDArray(bool busyWait = false) {
+        // set up fixed parameters for register write callback
         auto cb = std::bind(ringBufferCallback, buffer, busyWait, std::placeholders::_1, std::placeholders::_2);
 
-        for(uint8_t i = 0; i < SID_ARRAY_MAX_NUM_SIDS; i++) {
+        // initialize register write callback for all SIDs and their voices
+        for(uint8_t i = 0; i < MAX_NUM_SIDS; i++) {
             SID& sid = getSID(i);
 
             sid.getFilter().setRegisterWriteCallback(cb);
 
-            for(uint8_t j = 0; j < SID_NUM_VOICES; j++) {
+            for(uint8_t j = 0; j < SID::NUM_VOICES; j++) {
                 sid.getVoice(j).setRegisterWriteCallback(cb);
             }
         }
     }
 
     SID& getSID(uint8_t SIDNo) {
-        assert(SIDNo < SID_ARRAY_MAX_NUM_SIDS);
+        assert(SIDNo < MAX_NUM_SIDS);
 
         return SIDs[SIDNo];
     }
