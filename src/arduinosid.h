@@ -69,6 +69,10 @@ static const uint8_t SID_A2 = A2;
 static const uint8_t SID_A3 = A3;
 static const uint8_t SID_A4 = A4;
 
+static const uint8_t NUM_SID_AX = 5;
+
+static const std::array<uint8_t, NUM_SID_AX> SID_AX = { SID_A0, SID_A1, SID_A2, SID_A3, SID_A4 };
+
 static const uint8_t SID_D0 = 0;
 static const uint8_t SID_D1 = 1;
 static const uint8_t SID_D2 = 2;
@@ -78,8 +82,12 @@ static const uint8_t SID_D5 = 5;
 static const uint8_t SID_D6 = 6;
 static const uint8_t SID_D7 = 7;
 
+static const uint8_t NUM_SID_DX = 8;
+
+static const std::array<uint8_t, NUM_SID_DX> SID_DX = { SID_D0, SID_D1, SID_D2, SID_D3, SID_D4, SID_D5, SID_D6, SID_D7 };
+
 static const uint8_t SID_PHI_2 = 13;
 
-static const std::array<int, SID_ARRAY_MAX_NUM_SIDS> SID_CS = { A5, A6, A7, 10, 11, 12 };
+static const std::array<uint8_t, SIDArray::MAX_NUM_SIDS> SID_CS = { A5, A6, A7, 10, 11, 12 };
 
 #endif //ARDUINOSID_ARDUINOSID_H

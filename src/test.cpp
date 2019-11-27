@@ -1,8 +1,8 @@
 #include "sid.h"
 #include <iostream>
 
-const void testCallback(const uint8_t reg, const uint8_t val) {
-    std::cout << "reg: " << std::hex << (unsigned int)reg << " val: " << std::hex << (unsigned int)val << "\n";
+const void testCallback(const uint8_t sid, const uint8_t reg, const uint8_t val) {
+    std::cout << "sid: " << std::hex << (unsigned int)sid << "reg: " << std::hex << (unsigned int)reg << " val: " << std::hex << (unsigned int)val << "\n";
 }
 
 int main() {
@@ -19,8 +19,6 @@ int main() {
 //    }
 
     for(uint8_t i = 0; i < SIDArray::MAX_NUM_SIDS; i++) {
-        std::cout << "foo\n";
-        sidArray.buffer.dump();
         SID& sid = sidArray.getSID(i);
 
         sid.getFilter().setVolume(15);
