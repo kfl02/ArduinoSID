@@ -19,8 +19,6 @@ int main() {
 //    }
 
     for(uint8_t i = 0; i < SIDArray::MAX_NUM_SIDS; i++) {
-        std::cout << "foo\n";
-        sidArray.buffer.dump();
         SID& sid = sidArray.getSID(i);
 
         sid.getFilter().setVolume(15);

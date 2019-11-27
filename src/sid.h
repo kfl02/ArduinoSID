@@ -55,7 +55,8 @@ protected:
         static const uint8_t SIDCtlGat = 0x01;
 
     private:
-        const uint8_t voiceNo; // high nybble: SID number, low nybble: voice number, set from SID
+        const uint8_t SIDNo;
+        const uint8_t voiceNo;
         const uint8_t regOffset;
 
         uint8_t FQLo  = 0; // low byte of frequency
@@ -67,12 +68,13 @@ protected:
         uint8_t SR    = 0; // sustain and release
 
         // callback function for register write actions
-        std::function<void(const uint8_t, const uint8_t)> registerWriteCallback = [](const uint8_t, const uint8_t) {};
+        std::function<void(const uint8_t, const uint8_t, const uint8_t)> registerWriteCallback = [](const uint8_t, const uint8_t, const uint8_t) {};
 
     public:
         SIDVoice(const uint8_t SIDNo, const uint8_t voiceNo)
-            : voiceNo((SIDNo << 4) | (voiceNo & 0xf)),
-              regOffset((SIDNo << 4) | ((voiceNo & 0xf) * NUM_VOICES)) {
+            : SIDNo(SIDNo),
+              voiceNo(voiceNo),
+              regOffset((voiceNo & 0xf) * NUM_VOICES)) {
         }
 
         uint8_t const getVoiceNo() {
@@ -531,6 +533,7 @@ class SIDArray {
 public:
     static const uint8_t MAX_NUM_SIDS = 6;
 
+private:
     // ring buffer for saving register write actions to be processed by Arduino timer
     RingBuffer<std::tuple<uint8_t, uint8_t>, MAX_NUM_SIDS * SID::NUM_WO_REGS> buffer;
 
@@ -571,6 +574,10 @@ public:
         assert(SIDNo < MAX_NUM_SIDS);
 
         return SIDs[SIDNo];
+    }
+
+    auto &getRingBuffer() {
+        return buffer;
     }
 };
 
