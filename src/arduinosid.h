@@ -56,8 +56,8 @@ static const uint8_t A2 = PIN_A2;
 static const uint8_t A3 = PIN_A3;
 static const uint8_t A4 = PIN_A4;
 static const uint8_t A5 = PIN_A5;
-static const uint8_t A6 = PIN_A6;
-static const uint8_t A7 = PIN_A7;
+static const uint8_t A6 = PIN_A6;   // not usable as digital on Nano
+static const uint8_t A7 = PIN_A7;   // not usable as digital on Nano
 
 #endif // PIN_A0
 
@@ -73,21 +73,21 @@ static const uint8_t NUM_SID_AX = 5;
 
 static const std::array<uint8_t, NUM_SID_AX> SID_AX = { SID_A0, SID_A1, SID_A2, SID_A3, SID_A4 };
 
-static const uint8_t SID_D0 = 0;
-static const uint8_t SID_D1 = 1;
-static const uint8_t SID_D2 = 2;
-static const uint8_t SID_D3 = 3;
-static const uint8_t SID_D4 = 4;
-static const uint8_t SID_D5 = 5;
-static const uint8_t SID_D6 = 6;
-static const uint8_t SID_D7 = 7;
+static const uint8_t SID_D0 = 2;
+static const uint8_t SID_D1 = 3;
+static const uint8_t SID_D2 = 4;
+static const uint8_t SID_D3 = 5;
+static const uint8_t SID_D4 = 7;
+static const uint8_t SID_D5 = 8;
+static const uint8_t SID_D6 = 9;
+static const uint8_t SID_D7 = 10;
 
 static const uint8_t NUM_SID_DX = 8;
 
 static const std::array<uint8_t, NUM_SID_DX> SID_DX = { SID_D0, SID_D1, SID_D2, SID_D3, SID_D4, SID_D5, SID_D6, SID_D7 };
 
-static const uint8_t SID_PHI_2 = 13;
+static const uint8_t SID_PHI_2 = 6;
 
-static const std::array<uint8_t, SIDArray::MAX_NUM_SIDS> SID_CS = { A5, A6, A7, 10, 11, 12 };
+static const std::array<uint8_t, SIDArray::MAX_NUM_SIDS> SID_CS = { A5, 11, 12, 13 };
 
 #endif //ARDUINOSID_ARDUINOSID_H
