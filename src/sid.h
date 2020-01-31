@@ -554,7 +554,12 @@ private:
 public:
     SIDArray(bool busyWait = false) {
         // set up fixed parameters for register write callback
-        auto cb = std::bind(ringBufferCallback, buffer, busyWait, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
+        auto cb = std::bind(ringBufferCallback,
+                buffer,
+                busyWait,
+                std::placeholders::_1,
+                std::placeholders::_2,
+                std::placeholders::_3);
 
         // initialize register write callback for all SIDs and their voices
         for(uint8_t i = 0; i < MAX_NUM_SIDS; i++) {
